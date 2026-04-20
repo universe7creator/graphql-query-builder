@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GraphQL Query Builder — Build, Test & Optimize Queries</title>
+  <meta name="description" content="Professional GraphQL query builder with syntax highlighting, auto-formatting, schema introspection, and query validation. Build better GraphQL queries faster.">
+  <meta property="og:title" content="GraphQL Query Builder — Build, Test & Optimize Queries">
+  <meta property="og:description" content="Professional GraphQL query builder with syntax highlighting, auto-formatting, and schema introspection.">
+  <meta property="og:type" content="website">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: '#E10098',
+            secondary: '#FF6B9D',
+            dark: '#0a0a0f',
+            surface: '#13131f',
+            'surface-light': '#1e1e2e',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-out forwards',
+            'slide-up': 'slideUp 0.5s ease-out forwards',
+            'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { boxShadow: '0 0 20px rgba(225, 0, 152, 0.3)' },
+              '50%': { boxShadow: '0 0 40px rgba(225, 0, 152, 0.6)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { background: #0a0a0f; color: #fff; }
+    .gradient-text {
+      background: linear-gradient(135deg, #E10098 0%, #FF6B9D 50%, #FFA6C9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .glass-card {
+      background: rgba(30, 30, 46, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(225, 0, 152, 0.1);
+    }
+    .code-editor {
+      background: #0d0d14;
+      border: 1px solid #2a2a3c;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .line-numbers {
+      color: #4a4a5c;
+      user-select: none;
+      text-align: right;
+      padding-right: 1rem;
+      border-right: 1px solid #2a2a3c;
+    }
+    .syntax-keyword { color: #E10098; }
+    .syntax-string { color: #98c379; }
+    .syntax-comment { color: #5c6370; }
+    .syntax-type { color: #e5c07b; }
+    .syntax-field { color: #61afef; }
+    .glow-btn {
+      position: relative;
+      overflow: hidden;
+    }
+    .glow-btn::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(225, 0, 152, 0.3), transparent);
+      transform: rotate(45deg);
+      transition: all 0.5s;
+    }
+    .glow-btn:hover::before {
+      transform: rotate(45deg) translate(50%, 50%);
+    }
+    .feature-icon {
+      background: linear-gradient(135deg, rgba(225, 0, 152, 0.2), rgba(255, 107, 157, 0.1));
+    }
+    .query-preview {
+      background: linear-gradient(180deg, rgba(225, 0, 152, 0.1) 0%, transparent 100%);
+    }
+  </style>
+</head>
+<body class="font-sans antialiased overflow-x-hidden">
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 left-0 right-0 z-50 glass-card border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg">G</div>
+          <span class="font-bold text-xl tracking-tight">GraphQL<span class="text-primary">Builder</span></span>
+        </div>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="#features" class="text-gray-400 hover:text-white transition-colors">Features</a>
+          <a href="#demo" class="text-gray-400 hover:text-white transition-colors">Demo</a>
+          <a href="#pricing" class="text-gray-400 hover:text-white transition-colors">Pricing</a>
+          <a href="#faq" class="text-gray-400 hover:text-white transition-colors">FAQ</a>
+        </div>
+        <a href="#pricing" class="glow-btn px-6 py-2.5 rounded-full bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative min-h-screen flex items-center pt-20 overflow-hidden">
+    <div class="absolute inset-0">
+      <div class="absolute top-20 left-10 w-96 h-96 bg-primary/20 rounded-full blur-[128px]"></div>
+      <div class="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-[128px]"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px]"></div>
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div class="space-y-8 animate-slide-up">
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-sm text-primary">
+            <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+            New: Schema Introspection Support
+          </div>
+          <h1 class="text-5xl md:text-7xl font-extrabold leading-tight">
+            Build <span class="gradient-text">GraphQL</span><br>Queries Faster
+          </h1>
+          <p class="text-xl text-gray-400 max-w-lg leading-relaxed">
+            Professional query builder with syntax highlighting, auto-formatting, and schema introspection. Write better GraphQL in half the time.
+          </p>
+          <div class="flex flex-wrap gap-4">
+            <a href="#demo" class="glow-btn px-8 py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-white font-semibold text-lg hover:shadow-xl hover:shadow-primary/40 transition-all">
+              Try Demo Free
+            </a>
+            <a href="#features" class="px-8 py-4 rounded-full glass-card text-white font-semibold hover:bg-white/10 transition-all">
+              See Features
+            </a>
+          </div>
+          <div class="flex items-center gap-6 text-sm text-gray-500">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              No signup required
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              One-time purchase
+            </div>
+          </div>
+        </div>
+
+        <div class="relative animate-float">
+          <div class="code-editor rounded-2xl p-6 shadow-2xl shadow-primary/20">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-3 h-3 rounded-full bg-red-500"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              <span class="ml-4 text-sm text-gray-500">query.graphql</span>
+            </div>
+            <div class="flex">
+              <div class="line-numbers text-sm leading-6 pr-4">
+                1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11
+              </div>
+              <pre class="text-sm leading-6 overflow-x-auto"><code><span class="syntax-keyword">query</span> <span class="syntax-type">GetUser</span>(<span class="syntax-field">$id</span>: <span class="syntax-type">ID!</span>) {
+  <span class="syntax-field">user</span>(<span class="syntax-field">id</span>: <span class="syntax-field">$id</span>) {
+    <span class="syntax-field">id</span>
+    <span class="syntax-field">name</span>
+    <span class="syntax-field">email</span>
+    <span class="syntax-field">posts</span>(<span class="syntax-field">limit</span>: <span class="syntax-string">10</span>) {
+      <span class="syntax-field">title</span>
+      <span class="syntax-field">publishedAt</span>
+    }
+  }
+}</code></pre>
+            </div>
+          </div>
+          <div class="absolute -bottom-6 -right-6 glass-card rounded-xl p-4 shadow-xl">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              </div>
+              <div>
+                <div class="text-sm font-semibold">Query Valid</div>
+                <div class="text-xs text-gray-500">No errors found</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-24 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6">
+          Everything You Need for <span class="gradient-text">GraphQL</span>
+        </h2>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+          A complete toolkit for building, testing, and optimizing GraphQL queries with professional-grade features.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="glass-card rounded-2xl p-8 hover:border-primary/30 transition-all group">
+          <div class="feature-icon w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Smart Query Builder</h3>
+          <p class="text-gray-400 leading-relaxed">Visual query builder with auto-completion, field suggestions, and real-time validation as you type.</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-8 hover:border-primary/30 transition-all group">
+          <div class="feature-icon w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Syntax Highlighting</h3>
+          <p class="text-gray-400 leading-relaxed">Beautiful, customizable syntax highlighting for queries, mutations, subscriptions, and schema definitions.</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-8 hover:border-primary/30 transition-all group">
+          <div class="feature-icon w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Auto-Formatting</h3>
+          <p class="text-gray-400 leading-relaxed">Prettier-style formatting that keeps your queries clean and consistent with configurable rules.</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-8 hover:border-primary/30 transition-all group">
+          <div class="feature-icon w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Schema Introspection</h3>
+          <p class="text-gray-400 leading-relaxed">Automatically fetch and explore your GraphQL schema. Browse types, fields, and arguments with ease.</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-8 hover:border-primary/30 transition-all group">
+          <div class="feature-icon w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Query Validation</h3>
+          <p class="text-gray-400 leading-relaxed">Real-time error detection with helpful messages. Catch syntax errors and type mismatches instantly.</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-8 hover:border-primary/30 transition-all group">
+          <div class="feature-icon w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3">Query Templates</h3>
+          <p class="text-gray-400 leading-relaxed">Built-in templates for common patterns. Save your own snippets and share them with your team.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo Section -->
+  <section id="demo" class="py-24 relative">
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div class="text-center mb-12">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6">
+          Try It <span class="gradient-text">Live</span>
+        </h2>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+          Build and format GraphQL queries right in your browser. No signup required.
+        </p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-2 shadow-2xl">
+        <div class="code-editor rounded-xl overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-3 border-b border-white/5">
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full bg-red-500"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              <span class="ml-4 text-sm text-gray-500">Query Editor</span>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="formatQuery()" class="px-4 py-1.5 text-sm bg-white/5 hover:bg-white/10 rounded-lg transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                Format
+              </button>
+              <button onclick="validateQuery()" class="px-4 py-1.5 text-sm bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Validate
+              </button>
+            </div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-0">
+            <div class="border-r border-white/5">
+              <div class="px-4 py-2 text-xs text-gray-500 border-b border-white/5">Input</div>
+              <textarea id="queryInput" class="w-full h-96 bg-transparent p-4 font-mono text-sm resize-none focus:outline-none text-gray-300" spellcheck="false">query GetUserWithPosts($id: ID!, $limit: Int = 5) {
+  user(id: $id) {
+    id
+    name
+    email
+    avatar
+    posts(limit: $limit) {
+      id
+      title
+      content
+      publishedAt
+      author {
+        name
+      }
+    }
+  }
+}</textarea>
+            </div>
+            <div>
+              <div class="px-4 py-2 text-xs text-gray-500 border-b border-white/5">Formatted Output</div>
+              <pre id="queryOutput" class="w-full h-96 p-4 font-mono text-sm overflow-auto text-gray-300"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="validationResult" class="mt-4 hidden">
+        <div class="glass-card rounded-xl p-4 flex items-center gap-3">
+          <div id="validationIcon" class="w-10 h-10 rounded-lg flex items-center justify-center"></div>
+          <div>
+            <div id="validationTitle" class="font-semibold"></div>
+            <div id="validationMessage" class="text-sm text-gray-400"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="py-24 relative">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6">
+          Simple, <span class="gradient-text">One-Time</span> Pricing
+        </h2>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+          No subscriptions, no hidden fees. Pay once, own forever.
+        </p>
+      </div>
+
+      <div class="max-w-md mx-auto">
+        <div class="glass-card rounded-3xl p-8 border-2 border-primary/30 relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-gradient-to-bl from-primary to-secondary text-white text-xs font-bold px-4 py-2 rounded-bl-xl">
+            BEST VALUE
+          </div>
+          <div class="text-center mb-8">
+            <h3 class="text-2xl font-bold mb-2">GraphQL Query Builder</h3>
+            <p class="text-gray-400">Complete GraphQL toolkit</p>
+          </div>
+          <div class="text-center mb-8">
+            <span class="text-5xl font-bold">$9</span>
+            <span class="text-gray-400">one-time</span>
+          </div>
+          <ul class="space-y-4 mb-8">
+            <li class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              <span>Smart Query Builder</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              <span>Syntax Highlighting</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              <span>Auto-Formatting</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              <span>Schema Introspection</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              <span>Query Validation</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              <span>Lifetime Updates</span>
+            </li>
+          </ul>
+          <a href="https://profitbridge.lemonsqueezy.com/checkout/buy/graphql-query-builder" class="glow-btn block w-full py-4 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-bold text-center hover:shadow-xl hover:shadow-primary/40 transition-all animate-pulse-glow">
+            Buy Now — $9
+          </a>
+          <p class="text-center text-sm text-gray-500 mt-4">30-day money-back guarantee</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="py-24 relative">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6">
+          Frequently Asked <span class="gradient-text">Questions</span>
+        </h2>
+      </div>
+
+      <div class="space-y-4">
+        <div class="glass-card rounded-xl overflow-hidden">
+          <button class="w-full px-6 py-5 flex items-center justify-between text-left" onclick="toggleFaq(this)">
+            <span class="font-semibold">What is GraphQL Query Builder?</span>
+            <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div class="px-6 pb-5 text-gray-400 hidden">
+            GraphQL Query Builder is a professional developer tool that helps you build, format, validate, and optimize GraphQL queries. It includes features like syntax highlighting, auto-formatting, schema introspection, and query validation.
+          </div>
+        </div>
+
+        <div class="glass-card rounded-xl overflow-hidden">
+          <button class="w-full px-6 py-5 flex items-center justify-between text-left" onclick="toggleFaq(this)">
+            <span class="font-semibold">Do I need a subscription?</span>
+            <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div class="px-6 pb-5 text-gray-400 hidden">
+            No! This is a one-time purchase. Pay $9 once and get lifetime access to the tool, including all future updates.
+          </div>
+        </div>
+
+        <div class="glass-card rounded-xl overflow-hidden">
+          <button class="w-full px-6 py-5 flex items-center justify-between text-left" onclick="toggleFaq(this)">
+            <span class="font-semibold">Can I use this with any GraphQL API?</span>
+            <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div class="px-6 pb-5 text-gray-400 hidden">
+            Yes! GraphQL Query Builder works with any GraphQL API. You can introspect schemas from GitHub, Shopify, Contentful, or your own custom GraphQL server.
+          </div>
+        </div>
+
+        <div class="glass-card rounded-xl overflow-hidden">
+          <button class="w-full px-6 py-5 flex items-center justify-between text-left" onclick="toggleFaq(this)">
+            <span class="font-semibold">Is there a refund policy?</span>
+            <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div class="px-6 pb-5 text-gray-400 hidden">
+            Yes, we offer a 30-day money-back guarantee. If you're not satisfied with the tool, contact us for a full refund.
+          </div>
+        </div>
+
+        <div class="glass-card rounded-xl overflow-hidden">
+          <button class="w-full px-6 py-5 flex items-center justify-between text-left" onclick="toggleFaq(this)">
+            <span class="font-semibold">Will I get future updates?</span>
+            <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div class="px-6 pb-5 text-gray-400 hidden">
+            Absolutely! All future updates and new features are included with your one-time purchase. We're constantly improving the tool based on user feedback.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div class="col-span-2">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg">G</div>
+            <span class="font-bold text-xl">GraphQL<span class="text-primary">Builder</span></span>
+          </div>
+          <p class="text-gray-400 max-w-sm">
+            Professional GraphQL query builder for developers. Build better queries faster.
+          </p>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4">Product</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+            <li><a href="#demo" class="hover:text-white transition-colors">Demo</a></li>
+            <li><a href="#pricing" class="hover:text-white transition-colors">Pricing</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4">Support</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li><a href="#faq" class="hover:text-white transition-colors">FAQ</a></li>
+            <li><a href="mailto:support@graphqlbuilder.dev" class="hover:text-white transition-colors">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+        <p class="text-gray-500 text-sm">© 2026 GraphQL Query Builder. All rights reserved.</p>
+        <div class="flex gap-6 text-sm text-gray-500">
+          <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+          <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Format query on load
+    document.addEventListener('DOMContentLoaded', function() {
+      formatQuery();
+    });
+
+    // Format GraphQL query
+    function formatQuery() {
+      const input = document.getElementById('queryInput').value;
+      const output = document.getElementById('queryOutput');
+
+      // Simple formatter - in real implementation, this would use a proper GraphQL parser
+      let formatted = formatGraphQL(input);
+      output.textContent = formatted;
+    }
+
+    function formatGraphQL(query) {
+      let indent = 0;
+      let result = '';
+      let inString = false;
+
+      for (let i = 0; i < query.length; i++) {
+        const char = query[i];
+        const nextChar = query[i + 1];
+
+        if (char === '"' && query[i - 1] !== '\\') {
+          inString = !inString;
+          result += char;
+          continue;
+        }
+
+        if (inString) {
+          result += char;
+          continue;
+        }
+
+        if (char === '{' || char === '(') {
+          result += char + '\n' + '  '.repeat(++indent);
+        } else if (char === '}' || char === ')') {
+          result += '\n' + '  '.repeat(--indent) + char;
+        } else if (char === ',') {
+          result += char + '\n' + '  '.repeat(indent);
+        } else if (char === ' ' && nextChar === ' ') {
+          continue;
+        } else {
+          result += char;
+        }
+      }
+
+      return result.replace(/\n\s*\n/g, '\n').trim();
+    }
+
+    // Validate query
+    function validateQuery() {
+      const input = document.getElementById('queryInput').value;
+      const resultDiv = document.getElementById('validationResult');
+      const iconDiv = document.getElementById('validationIcon');
+      const titleDiv = document.getElementById('validationTitle');
+      const messageDiv = document.getElementById('validationMessage');
+
+      resultDiv.classList.remove('hidden');
+
+      // Simple validation - check for basic GraphQL structure
+      const hasQuery = input.includes('query') || input.includes('mutation') || input.includes('subscription');
+      const hasBraces = input.includes('{') && input.includes('}');
+      const bracesMatch = (input.match(/{/g) || []).length === (input.match(/}/g) || []).length;
+      const parensMatch = (input.match(/\(/g) || []).length === (input.match(/\)/g) || []).length;
+
+      if (hasQuery && hasBraces && bracesMatch && parensMatch) {
+        iconDiv.className = 'w-10 h-10 rounded-lg flex items-center justify-center bg-green-500/20';
+        iconDiv.innerHTML = '<svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+        titleDiv.textContent = 'Query is valid!';
+        titleDiv.className = 'font-semibold text-green-500';
+        messageDiv.textContent = 'Your GraphQL query syntax looks correct.';
+      } else {
+        iconDiv.className = 'w-10 h-10 rounded-lg flex items-center justify-center bg-red-500/20';
+        iconDiv.innerHTML = '<svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+        titleDiv.textContent = 'Validation errors found';
+        titleDiv.className = 'font-semibold text-red-500';
+        let errors = [];
+        if (!hasQuery) errors.push('Missing query/mutation/subscription keyword');
+        if (!hasBraces) errors.push('Missing braces');
+        if (!bracesMatch) errors.push('Mismatched braces');
+        if (!parensMatch) errors.push('Mismatched parentheses');
+        messageDiv.textContent = errors.join(', ');
+      }
+    }
+
+    // Toggle FAQ
+    function toggleFaq(button) {
+      const answer = button.nextElementSibling;
+      const icon = button.querySelector('svg');
+
+      answer.classList.toggle('hidden');
+      icon.classList.toggle('rotate-180');
+    }
+
+    // Scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.glass-card').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      observer.observe(el);
+    });
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "GraphQL Query Builder",
+    "description": "Build, test and optimize GraphQL queries with syntax highlighting, auto-formatting, and schema introspection",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "9",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "GraphQL Query Builder",
+  "slug": "graphql-query-builder",
+  "tagline": "Build GraphQL queries visually with auto-completion, validation & one-click copy",
+  "description": "Visual GraphQL query builder with drag-and-drop interface, real-time syntax validation, and schema introspection. Build complex queries without memorizing syntax.",
+  "price": "$19",
+  "features": [
+    "Visual query builder with field explorer",
+    "Auto-completion for fields and arguments",
+    "Real-time syntax validation",
+    "One-click query copy",
+    "Schema introspection support",
+    "Query history and favorites",
+    "Export to multiple formats"
+  ],
+  "tech_stack": "Vercel + Node.js",
+  "status": "building",
+  "vercel_url": null,
+  "github_url": null,
+  "lemonsqueezy_checkout_url": null,
+  "lemonsqueezy_product_id": null,
+  "webhook_url": null,
+  "created_cycle": 934,
+  "deployed_cycle": null
+}

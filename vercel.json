@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/**/*.js", "use": "@vercel/node" },
+    { "src": "public/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/health", "dest": "/api/health.js" },
+    { "src": "/api/webhook", "dest": "/api/webhook.js" },
+    { "src": "/api/introspect", "dest": "/api/introspect.js" },
+    { "src": "/api/validate", "dest": "/api/validate.js" },
+    { "src": "/api/build-query", "dest": "/api/build-query.js" },
+    { "src": "/(.*)", "dest": "/public/index.html" }
+  ]
+}
